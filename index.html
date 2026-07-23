@@ -86,6 +86,9 @@
     gap:14px;
     align-items:flex-end;
   }
+  .period-fields{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
+  .period-nav{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
+  .period-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
   .field{display:flex;flex-direction:column;gap:4px;}
   .field label{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:#93a3b3;}
   .field input, .field select{
@@ -146,6 +149,8 @@
     color:var(--ink);
   }
   .chip-group{display:flex;gap:6px;flex-wrap:wrap;}
+  .controls-row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .controls-row3{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:auto;}
   .chip{
     border:1px solid var(--line);
     background:var(--paper);
@@ -298,15 +303,61 @@
   .day-opt[data-code="BH"]{border-color:#a29ce0;color:#2c2570;}
 
   @media (max-width:640px){
-    body{font-size:15px;}
+    body{font-size:14px;}
+
+    /* Cabeçalho */
+    .topbar{padding:16px 14px 14px;}
     .meta-grid{display:none;}
-    .period-bar{gap:10px;}
-    thead .day-col{min-width:32px;}
-    tbody td.name-cell{min-width:120px;max-width:120px;padding-left:8px;}
-    tbody td.shift-cell{min-width:64px;max-width:64px;font-size:.6rem;}
-    th.sticky-col2, td.sticky-col2{left:120px;}
-    th.sticky-col3, td.sticky-col3{left:184px;}
-    tbody td.action-cell{min-width:64px;max-width:64px;}
+    .title{font-size:1.15rem;}
+    .subtitle{font-size:.78rem;}
+
+    /* Barra de período: empilha em grupos, sem hint decorativo */
+    .period-bar{padding:12px 12px;gap:12px;}
+    .period-fields{width:100%;gap:8px;}
+    .period-fields .field{flex:1 1 auto;min-width:0;}
+    .period-fields .field input{width:100%;font-size:.8rem;padding:8px;}
+    #periodo-auto{min-width:0 !important;}
+    .period-nav{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .period-nav #btn-hoje{grid-column:1 / -1;}
+    .period-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .period-actions #btn-print{grid-column:1 / -1;}
+    .period-bar .btn{padding:10px 10px;font-size:.78rem;text-align:center;}
+    .hint{display:none;}
+
+    /* Controles: busca cheia, filtros e ações empilhados */
+    .controls{padding:10px 12px;gap:8px;}
+    .controls input[type=search]{flex:1 1 100%;font-size:16px;}
+    .controls-row2{width:100%;gap:8px;flex-direction:column;align-items:stretch;}
+    .chip-group{flex:1 1 auto;}
+    .chip{padding:8px 10px;font-size:.72rem;flex:1 1 auto;text-align:center;}
+    .controls select{width:100%;}
+    .controls-row3{width:100%;margin-left:0;justify-content:space-between;}
+    #btn-add-employee{flex:1 1 auto;padding:10px;font-size:.78rem;}
+    .counter{font-size:.7rem;}
+
+    /* Tabela: colunas fixas mais estreitas e toques maiores */
+    .wrap{margin:0;padding:0 10px;}
+    .table-shell{max-height:66vh;}
+    thead .day-col{min-width:34px;}
+    thead .day-col .dnum{font-size:.72rem;}
+    thead .day-col .dname{font-size:.55rem;}
+    tbody td{padding:8px 4px;}
+    tbody td.name-cell{min-width:112px;max-width:112px;padding-left:8px;font-size:.78rem;}
+    tbody td.name-cell small{font-size:.6rem;}
+    tbody td.shift-cell{min-width:58px;max-width:58px;font-size:.58rem;}
+    th.sticky-col2, td.sticky-col2{left:112px;}
+    th.sticky-col3, td.sticky-col3{left:170px;}
+    tbody td.action-cell{min-width:58px;max-width:58px;padding:6px 3px;}
+    .ferias-btn{font-size:.6rem;min-height:32px;}
+    .edit-emp-btn{font-size:.85rem;padding:4px 6px;}
+
+    .legend{gap:10px 14px;padding:12px;font-size:.7rem;}
+
+    /* Modais: melhor aproveitamento em telas curtas */
+    .modal-overlay{padding:10px;align-items:flex-end;}
+    .modal{max-width:none;width:100%;max-height:88vh;overflow-y:auto;padding:18px;border-radius:16px 16px 0 0;}
+    .modal-actions{flex-wrap:wrap;}
+    .modal-actions .btn{flex:1 1 auto;}
   }
 
   @media print{
@@ -347,38 +398,48 @@
 </div>
 
 <div class="period-bar">
-  <div class="field">
-    <label for="ref-month">Mês de referência</label>
-    <input type="month" id="ref-month">
+  <div class="period-fields">
+    <div class="field">
+      <label for="ref-month">Mês de referência</label>
+      <input type="month" id="ref-month">
+    </div>
+    <div class="field readonly">
+      <label>Período</label>
+      <input type="text" id="periodo-auto" readonly style="min-width:150px;">
+    </div>
+    <div class="field readonly">
+      <label>Grupo que folga no 1º domingo</label>
+      <input type="text" id="grupo-auto" readonly>
+    </div>
   </div>
-  <div class="field readonly">
-    <label>Período</label>
-    <input type="text" id="periodo-auto" readonly style="min-width:150px;">
+  <div class="period-nav">
+    <button class="btn secondary" id="btn-prev">← Mês anterior</button>
+    <button class="btn" id="btn-next">Próximo mês →</button>
+    <button class="btn secondary" id="btn-hoje">Ir para hoje</button>
   </div>
-  <div class="field readonly">
-    <label>Grupo que folga no 1º domingo</label>
-    <input type="text" id="grupo-auto" readonly>
+  <div class="period-actions">
+    <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
+    <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
+    <button class="btn secondary" id="btn-users" style="display:none;">👤 Usuários / senha</button>
   </div>
-  <button class="btn secondary" id="btn-prev">← Mês anterior</button>
-  <button class="btn" id="btn-next">Próximo mês →</button>
-  <button class="btn secondary" id="btn-hoje">Ir para hoje</button>
-  <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
-  <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
-  <button class="btn secondary" id="btn-users" style="display:none;">👤 Usuários / senha</button>
   <span class="hint">O período sempre vai do dia 16 do mês escolhido até o dia 15 do mês seguinte, igual à planilha. A rotação dos domingos é calculada automaticamente a partir de 16/08/2026 (grupo 2). Clique em qualquer célula do dia (no modo edição) para marcar FX, FF ou BH.</span>
 </div>
 
 <div class="controls">
   <input type="search" id="search" placeholder="Buscar por nome ou matrícula…" autocomplete="off">
-  <div class="chip-group" id="group-chips">
-    <button class="chip active" data-group="all">Todos os grupos</button>
-    <button class="chip" data-group="1">Grupo 1</button>
-    <button class="chip" data-group="2">Grupo 2</button>
-    <button class="chip" data-group="3">Grupo 3</button>
+  <div class="controls-row2">
+    <div class="chip-group" id="group-chips">
+      <button class="chip active" data-group="all">Todos</button>
+      <button class="chip" data-group="1">Grupo 1</button>
+      <button class="chip" data-group="2">Grupo 2</button>
+      <button class="chip" data-group="3">Grupo 3</button>
+    </div>
+    <select id="shift-select"><option value="all">Todos os horários</option></select>
   </div>
-  <select id="shift-select"><option value="all">Todos os horários</option></select>
-  <button class="btn" id="btn-add-employee">+ Novo colaborador</button>
-  <span class="counter" id="result-counter"></span>
+  <div class="controls-row3">
+    <button class="btn" id="btn-add-employee">+ Novo colaborador</button>
+    <span class="counter" id="result-counter"></span>
+  </div>
 </div>
 
 <div class="wrap">
