@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala 286 – Maracanã | Dinâmica</title>
+<style>
+  :root{
+    --ink:#161b22;
+    --paper:#f6f5f1;
+    --panel:#ffffff;
+    --line:#e2e0d8;
+    --muted:#6b7280;
+    --navy:#1c2b3a;
+    --navy-2:#243b52;
+    --amber:#e8912d;
+    --amber-soft:#fdecd3;
+    --amber-strong:#f7b955;
+    --amber-strong-bg:#fbc873;
+    --green:#3f7d58;
+    --green-soft:#dcf1e3;
+    --green-strong:#38a169;
+    --violet:#6a4fa3;
+    --violet-soft:#efe8f9;
+    --violet-strong:#a687e0;
+    --today:#c0392b;
+    --radius:10px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .topbar{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);
+    color:#f4f1ea;
+    padding:22px clamp(14px,3vw,36px) 20px;
+  }
+  .topbar-inner{
+    max-width:1500px;
+    margin:0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.7rem;
+    color:var(--amber);
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .title{
+    font-size:clamp(1.3rem,2.4vw,1.85rem);
+    font-weight:700;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .subtitle{
+    margin:6px 0 0;
+    color:#c9d2da;
+    font-size:.9rem;
+  }
+  .meta-grid{
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+    font-size:.82rem;
+  }
+  .meta-item{display:flex;flex-direction:column;gap:2px;}
+  .meta-item span:first-child{color:#93a3b3;text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;}
+  .meta-item span:last-child{font-weight:600;color:#f4f1ea;font-size:.92rem;}
+
+  .period-bar{
+    background:#0f1720;
+    padding:12px clamp(14px,3vw,36px);
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:flex-end;
+  }
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:#93a3b3;}
+  .field input, .field select{
+    padding:7px 10px;
+    border-radius:7px;
+    border:1px solid #2c3e50;
+    background:#182430;
+    color:#f4f1ea;
+    font-size:.85rem;
+  }
+  .field.readonly input{color:var(--amber);font-weight:700;border-color:#3a4e63;}
+  .btn{
+    padding:8px 16px;
+    border-radius:8px;
+    border:1px solid var(--amber);
+    background:var(--amber);
+    color:#221200;
+    font-weight:700;
+    font-size:.82rem;
+    cursor:pointer;
+  }
+  .btn.secondary{
+    background:transparent;
+    color:#f4f1ea;
+    border-color:#3a4e63;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .lock-btn{background:transparent;border:1px solid #3a4e63;color:#c9d2da;}
+  .lock-btn.unlocked{background:var(--green-strong);border-color:var(--green-strong);color:#fff;}
+  .hint{font-size:.72rem;color:#8ea0b3;max-width:260px;line-height:1.4;}
+
+  .controls{
+    position:sticky;
+    top:0;
+    z-index:30;
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    padding:12px clamp(14px,3vw,36px);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .controls input[type=search]{
+    flex:1 1 220px;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:.9rem;
+    background:var(--paper);
+  }
+  .controls select{
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    font-size:.85rem;
+    color:var(--ink);
+  }
+  .chip-group{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--line);
+    background:var(--paper);
+    padding:7px 12px;
+    border-radius:999px;
+    font-size:.78rem;
+    cursor:pointer;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .chip.active{background:var(--navy);border-color:var(--navy);color:#fdecd3;}
+  .counter{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+
+  .wrap{max-width:none;margin:20px 20px 60px;padding:0 clamp(14px,2vw,28px);}
+
+  .table-shell{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:auto;
+    max-height:70vh;
+  }
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:.78rem;}
+  thead th{
+    position:sticky;top:0;
+    background:var(--navy);
+    color:#f4f1ea;
+    z-index:5;
+    padding:8px 5px;
+    font-weight:600;
+    white-space:nowrap;
+    border-bottom:2px solid var(--navy-2);
+  }
+  thead .day-col{text-align:center;min-width:38px;}
+  thead .day-col .dnum{display:block;font-size:.8rem;font-weight:700;}
+  thead .day-col .dname{display:block;font-size:.6rem;color:#c9d2da;text-transform:uppercase;}
+  thead .day-col.sunday{background:#2c445c;}
+  thead .day-col.today{background:var(--today);}
+
+  th.sticky-col, td.sticky-col{position:sticky;left:0;background:var(--panel);z-index:4;}
+  th.sticky-col2, td.sticky-col2{position:sticky;left:150px;background:var(--panel);z-index:4;}
+  th.sticky-col3, td.sticky-col3{position:sticky;left:228px;background:var(--panel);z-index:4;}
+  thead th.sticky-col, thead th.sticky-col2, thead th.sticky-col3{z-index:6;background:var(--navy);}
+  td.sticky-col{border-right:1px solid var(--line);}
+  td.sticky-col3{border-right:1px solid var(--line);}
+
+  tbody td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody td.name-cell{text-align:left;font-weight:600;padding-left:10px;min-width:150px;max-width:150px;line-height:1.25;}
+  tbody td.name-cell small{display:block;font-weight:400;color:var(--muted);font-size:.62rem;}
+  tbody td.shift-cell{color:var(--muted);font-size:.66rem;min-width:78px;max-width:78px;white-space:normal;line-height:1.2;}
+  tbody td.action-cell{min-width:78px;max-width:78px;padding:6px 4px;}
+  tbody tr:nth-child(even) td:not(.sticky-col):not(.sticky-col2):not(.sticky-col3){background:#fbfaf7;}
+  tbody tr:nth-child(even) td.sticky-col,
+  tbody tr:nth-child(even) td.sticky-col2,
+  tbody tr:nth-child(even) td.sticky-col3{background:#fbfaf7;}
+  tbody tr:hover td{background:#f1ede2 !important;}
+
+  .cell-t{background:#ffffff !important;color:#9aa3ad;font-weight:500;}
+  .cell-dsr{background:var(--amber-strong-bg) !important;color:#7a3e00;font-weight:800;border-radius:5px;box-shadow:inset 0 0 0 1px #e59b2e;}
+  .cell-ferias{background:var(--violet-strong) !important;color:#33195c;font-weight:800;border-radius:5px;box-shadow:inset 0 0 0 1px #8a63c9;}
+  .cell-t.cell-sunday{background:#dbe9f6 !important;color:#274a68;font-weight:700;border-radius:5px;box-shadow:inset 0 0 0 1px #a9c8e2;}
+  .cell-fx{background:#f7cfc7 !important;color:#7a1f0d;font-weight:800;border-radius:5px;box-shadow:inset 0 0 0 1px #e0958a;}
+  .cell-ff{background:#bfe8e2 !important;color:#0d4a42;font-weight:800;border-radius:5px;box-shadow:inset 0 0 0 1px #7ac9be;}
+  .cell-bh{background:#d6d3f7 !important;color:#2c2570;font-weight:800;border-radius:5px;box-shadow:inset 0 0 0 1px #a29ce0;}
+  .col-today{box-shadow:inset 0 0 0 2px var(--today) !important;}
+  td.col-today.cell-t, td.col-today.cell-dsr, td.col-today.cell-ferias,
+  td.col-today.cell-fx, td.col-today.cell-ff, td.col-today.cell-bh{box-shadow:inset 0 0 0 2px var(--today) !important;}
+  tbody td.col-today:not(.cell-t):not(.cell-dsr):not(.cell-ferias):not(.cell-fx):not(.cell-ff):not(.cell-bh){background:#fdf1ee !important;}
+  tbody td.day-cell{cursor:pointer;}
+  tbody td.day-cell:hover{outline:2px solid #94a3b8;outline-offset:-2px;}
+
+  .group-pill{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:.68rem;font-weight:700;color:#fff;flex:none;}
+  .g1{background:#2e6b8a;} .g2{background:#3f7d58;} .g3{background:#a35b1f;}
+
+  .ferias-btn{
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--violet);
+    font-size:.62rem;
+    font-weight:700;
+    padding:5px 4px;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    white-space:normal;
+    line-height:1.2;
+  }
+  .ferias-btn.has-ferias{background:var(--violet-soft);border-color:#cdb9ea;}
+  .ferias-btn:hover{filter:brightness(0.97);}
+  .edit-emp-btn{
+    border:none;background:transparent;cursor:pointer;font-size:.72rem;
+    padding:0 2px;margin-left:4px;opacity:.55;vertical-align:middle;
+  }
+  .edit-emp-btn:hover{opacity:1;}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;padding:14px 16px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    font-size:.78rem;color:var(--muted);align-items:center;
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .swatch{width:14px;height:14px;border-radius:4px;display:inline-block;}
+  .sw-t{background:#ffffff;border:1px solid #d7dbe0;}
+  .sw-dsr{background:var(--amber-strong-bg);border:1px solid #e59b2e;}
+  .sw-ferias{background:var(--violet-strong);border:1px solid #8a63c9;}
+  .sw-fx{background:#f7cfc7;border:1px solid #e0958a;}
+  .sw-ff{background:#bfe8e2;border:1px solid #7ac9be;}
+  .sw-bh{background:#d6d3f7;border:1px solid #a29ce0;}
+  .sw-sunday{background:#dbe9f6;border:1px solid #a9c8e2;}
+  .sw-today{background:#fff;border:2px solid var(--today);}
+
+  footer{text-align:center;color:var(--muted);font-size:.75rem;padding:0 20px 30px;}
+  .no-results{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(15,23,32,.55);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:16px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--panel);border-radius:var(--radius);padding:22px;max-width:360px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .modal h3{margin:0 0 4px;font-size:1.05rem;}
+  .modal p.sub{margin:0 0 16px;color:var(--muted);font-size:.8rem;}
+  .modal .field{margin-bottom:12px;}
+  .modal .field label{color:var(--muted);}
+  .modal .field input{border:1px solid var(--line);background:var(--paper);color:var(--ink);width:100%;padding:8px 10px;border-radius:7px;}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+  .modal-actions .btn{padding:8px 14px;}
+  .modal-actions .btn.ghost{background:transparent;border-color:var(--line);color:var(--muted);}
+  .modal-actions .btn.danger{background:#fbeae7;border-color:#f0c4bb;color:#a3341f;}
+
+  .day-options{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px;}
+  .day-opt{
+    text-align:left;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    font-size:.85rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .day-opt:hover{background:#eeece4;}
+  .day-opt[data-code="FX"]{border-color:#e0958a;color:#7a1f0d;}
+  .day-opt[data-code="FF"]{border-color:#7ac9be;color:#0d4a42;}
+  .day-opt[data-code="BH"]{border-color:#a29ce0;color:#2c2570;}
+
+  @media (max-width:640px){
+    body{font-size:15px;}
+    .meta-grid{display:none;}
+    .period-bar{gap:10px;}
+    thead .day-col{min-width:32px;}
+    tbody td.name-cell{min-width:120px;max-width:120px;padding-left:8px;}
+    tbody td.shift-cell{min-width:64px;max-width:64px;font-size:.6rem;}
+    th.sticky-col2, td.sticky-col2{left:120px;}
+    th.sticky-col3, td.sticky-col3{left:184px;}
+    tbody td.action-cell{min-width:64px;max-width:64px;}
+  }
+
+  @media print{
+    @page{ size: landscape; margin: 8mm; }
+    body{background:#fff;font-size:9px;}
+    .period-bar, .controls, footer, .modal-overlay,
+    #btn-prev, #btn-next, #btn-hoje, #btn-print, #btn-auth,
+    #btn-add-employee, .edit-emp-btn, .ferias-btn{ display:none !important; }
+    .topbar{padding:10px 14px;}
+    .meta-grid{font-size:.7rem;}
+    .wrap{margin:0;padding:0;}
+    .table-shell{max-height:none !important;overflow:visible !important;border:none;}
+    th.sticky-col, td.sticky-col, th.sticky-col2, td.sticky-col2, th.sticky-col3, td.sticky-col3{
+      position:static !important;
+    }
+    thead th{position:static !important;}
+    table{font-size:8px;}
+    tbody td{padding:3px 2px;}
+    .legend{page-break-inside:avoid;font-size:.65rem;padding:8px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <p class="eyebrow">Escala de trabalho · Loja 286</p>
+      <h1 class="title" id="page-title">Maracanã</h1>
+      <p class="subtitle">Rotação 6x1 / 2x1 aos domingos · DSR calculado dinamicamente</p>
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><span>Gestor</span><span id="meta-gestor">—</span></div>
+      <div class="meta-item"><span>Centro de resultado</span><span id="meta-cr">—</span></div>
+      <div class="meta-item"><span>Colaboradores</span><span id="meta-count">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="period-bar">
+  <div class="field">
+    <label for="ref-month">Mês de referência</label>
+    <input type="month" id="ref-month">
+  </div>
+  <div class="field readonly">
+    <label>Período</label>
+    <input type="text" id="periodo-auto" readonly style="min-width:150px;">
+  </div>
+  <div class="field readonly">
+    <label>Grupo que folga no 1º domingo</label>
+    <input type="text" id="grupo-auto" readonly>
+  </div>
+  <button class="btn secondary" id="btn-prev">← Mês anterior</button>
+  <button class="btn" id="btn-next">Próximo mês →</button>
+  <button class="btn secondary" id="btn-hoje">Ir para hoje</button>
+  <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
+  <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
+  <span class="hint">O período sempre vai do dia 16 do mês escolhido até o dia 15 do mês seguinte, igual à planilha. A rotação dos domingos é calculada automaticamente a partir de 16/08/2026 (grupo 2). Clique em qualquer célula do dia (no modo edição) para marcar FX, FF ou BH.</span>
+</div>
+
+<div class="controls">
+  <input type="search" id="search" placeholder="Buscar por nome ou matrícula…" autocomplete="off">
+  <div class="chip-group" id="group-chips">
+    <button class="chip active" data-group="all">Todos os grupos</button>
+    <button class="chip" data-group="1">Grupo 1</button>
+    <button class="chip" data-group="2">Grupo 2</button>
+    <button class="chip" data-group="3">Grupo 3</button>
+  </div>
+  <select id="shift-select"><option value="all">Todos os horários</option></select>
+  <button class="btn" id="btn-add-employee">+ Novo colaborador</button>
+  <span class="counter" id="result-counter"></span>
+</div>
+
+<div class="wrap">
+  <div class="table-shell">
+    <table id="schedule-table">
+      <thead>
+        <tr class="dow-row">
+          <th class="sticky-col" style="min-width:150px;">Colaborador</th>
+          <th class="sticky-col2" style="min-width:78px;">Horário</th>
+          <th class="sticky-col3" style="min-width:78px;">Férias</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="no-results" id="no-results" style="display:none;">Nenhum colaborador encontrado.</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch sw-t"></span> T — Trabalho (dia útil)</div>
+    <div class="legend-item"><span class="swatch sw-sunday"></span> T — Trabalho no domingo</div>
+    <div class="legend-item"><span class="swatch sw-dsr"></span> DSR — Descanso Semanal Remunerado</div>
+    <div class="legend-item"><span class="swatch sw-fx"></span> FX — Falta</div>
+    <div class="legend-item"><span class="swatch sw-ff"></span> FF — Folga de feriado</div>
+    <div class="legend-item"><span class="swatch sw-bh"></span> BH — Banco de horas</div>
+    <div class="legend-item"><span class="swatch sw-ferias"></span> Férias</div>
+    <div class="legend-item"><span class="swatch sw-today"></span> Hoje</div>
+    <div class="legend-item"><span class="group-pill g1">1</span><span class="group-pill g2">2</span><span class="group-pill g3">3</span> Grupo de rotação</div>
+  </div>
+</div>
+
+<footer>Escala calculada dinamicamente (mesma lógica da planilha ESCALA_IFOOD) · férias e período ficam salvos neste navegador.</footer>
+
+<!-- Modal de senha (modo edição) -->
+<div class="modal-overlay" id="auth-overlay">
+  <div class="modal">
+    <h3>Modo edição</h3>
+    <p class="sub" id="auth-sub">Digite a senha para lançar/editar férias. Sem a senha, a escala fica só para visualização.</p>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="auth-password" autocomplete="off">
+    </div>
+    <p class="sub" id="auth-error" style="display:none;color:#a3341f;">Senha incorreta. Tente novamente.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="auth-cancel">Cancelar</button>
+      <button class="btn" id="auth-submit">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de férias -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-name">Férias</h3>
+    <p class="sub">Defina o período de férias deste colaborador. Os dias entram automaticamente como "D" na escala.</p>
+    <div class="field">
+      <label>Início das férias</label>
+      <input type="date" id="modal-inicio">
+    </div>
+    <div class="field">
+      <label>Fim das férias</label>
+      <input type="date" id="modal-fim">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Cancelar</button>
+      <button class="btn danger" id="modal-clear">Remover férias</button>
+      <button class="btn" id="modal-save">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de marcação diária (FX / FF / BH) -->
+<div class="modal-overlay" id="day-overlay">
+  <div class="modal">
+    <h3 id="day-modal-name">Marcação do dia</h3>
+    <p class="sub" id="day-modal-sub">Escolha o que marcar neste dia.</p>
+    <div class="day-options">
+      <button class="day-opt" data-code="">Normal (T/DSR automático)</button>
+      <button class="day-opt" data-code="FX">FX — Falta</button>
+      <button class="day-opt" data-code="FF">FF — Folga de feriado</button>
+      <button class="day-opt" data-code="BH">BH — Banco de horas</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="day-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de cadastro/edição de colaborador -->
+<div class="modal-overlay" id="emp-overlay">
+  <div class="modal">
+    <h3 id="emp-modal-title">Novo colaborador</h3>
+    <p class="sub">Preencha os dados do colaborador. O grupo define a rotação de domingos; o dia de folga fixa é o DSR semanal.</p>
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" id="emp-nome">
+    </div>
+    <div class="field">
+      <label>Matrícula</label>
+      <input type="text" id="emp-matricula" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label>Função</label>
+      <input type="text" id="emp-funcao" placeholder="Ex: Op. Loja, Pleno">
+    </div>
+    <div class="field">
+      <label>Horário</label>
+      <input type="text" id="emp-horario" placeholder="Ex: 07:00 – 15:20">
+    </div>
+    <div class="field">
+      <label>Grupo de rotação (domingo)</label>
+      <select id="emp-grupo">
+        <option value="1">Grupo 1</option>
+        <option value="2">Grupo 2</option>
+        <option value="3">Grupo 3</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Dia de folga fixa (DSR semanal)</label>
+      <select id="emp-folga">
+        <option value="seg">Segunda</option>
+        <option value="ter">Terça</option>
+        <option value="qua">Quarta</option>
+        <option value="qui">Quinta</option>
+        <option value="sex">Sexta</option>
+        <option value="sáb">Sábado</option>
+      </select>
+    </div>
+    <p class="sub" id="emp-error" style="display:none;color:#a3341f;">Preencha nome e matrícula corretamente.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="emp-cancel">Cancelar</button>
+      <button class="btn danger" id="emp-delete" style="display:none;">Excluir colaborador</button>
+      <button class="btn" id="emp-save">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script id="roster-data" type="application/json">
+{"meta": {"inicio_periodo": "2026-08-16", "centro_resultado": "0912-935", "grupo_folga_1dom": 2, "gestor": "DIEGO RIBEIRO", "loja": "286 – MARACANÃ"}, "employees": [{"matricula": 7153570, "nome": "Anna Caroline", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5624576, "nome": "Cláudia Regina", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6427510, "nome": "Danillo de Souza", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6005225, "nome": "Francicleide dos Santos", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5885264, "nome": "Joselito Dias Sobreira", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5646375, "nome": "Lizandra Araujo", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": "2026-07-16", "fim_ferias": "2026-07-30"}, {"matricula": 6528910, "nome": "Matheus Carlos", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7026595, "nome": "Maria Eduarda", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6899153, "nome": "Nataniel Sousa", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6755461, "nome": "Simone do Carmo", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7026013, "nome": "Victoria Aquino", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6465951, "nome": "Alfredo Nascimento", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5361060, "nome": "Gabriel Martins", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 4275195, "nome": "Gleyce Kelly", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5568978, "nome": "Felipe Mota", "funcao": "Pleno", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7231784, "nome": "Andrey da Costa", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6926177, "nome": "Alohan da Costa", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7237316, "nome": "Daniele Teixeira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7216165, "nome": "Deivison Vieira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7237308, "nome": "Fernanda Pereira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7029578, "nome": "Jonas Felipe", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7160542, "nome": "Kamili Conceição", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7115261, "nome": "Leonard Gerard", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7029322, "nome": "Marcelo da Silva", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7014252, "nome": "Suelen da Silva", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7122659, "nome": "Talia Mesquita", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7164289, "nome": "Taissa Ferreira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6259731, "nome": "Guilherme Veras", "funcao": "Op. Loja", "horario": "22:00 – 05:20", "grupo": 1, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6739733, "nome": "Lohan Rodrigues", "funcao": "Op. Loja", "horario": "22:00 – 05:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}]}
+</script>
+
+<script>
+(function(){
+  const ROSTER = JSON.parse(document.getElementById('roster-data').textContent);
+  const meta = ROSTER.meta;
+
+  // ---- Anchor for continuous Sunday rotation ----
+  // 2026-08-16 is a Sunday, and on that period Group 2 has DSR (from the original spreadsheet).
+  const ANCHOR_DATE = new Date('2026-08-16T00:00:00');
+  const ANCHOR_GROUP = 2;
+  const DOW_ABBR = ['dom','seg','ter','qua','qui','sex','sáb'];
+  const STORAGE_KEY = 'escala286_state_v2';
+  const AUTH_KEY = 'escala286_edit_unlocked';
+  // Hash SHA-256 da senha de edição (senha padrão: escala286 — troque pedindo pro Claude gerar outro hash)
+  const EDIT_PASSWORD_HASH = '0b085eac372ef94e0d1ea9d6d4d81ede04217bbc32f63a60e86c031bcbc5a8ca';
+
+  function toISO(d){ return d.toISOString().slice(0,10); }
+  function fromISO(s){ return new Date(s + 'T00:00:00'); }
+  function addDays(d, n){ const nd = new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+  function mod(n, m){ return ((n % m) + m) % m; }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+
+  // A ref month "YYYY-MM" significa: período vai do dia 16 desse mês até o dia 15 do mês seguinte.
+  function refMonthFromDate(d){
+    let y = d.getFullYear(), m = d.getMonth(); // 0-based
+    if (d.getDate() < 16){ m -= 1; if(m<0){m=11;y-=1;} }
+    return y + '-' + pad2(m+1);
+  }
+  function periodStartFromRefMonth(refMonth){
+    const [y,m] = refMonth.split('-').map(Number);
+    return new Date(y, m-1, 16);
+  }
+  function periodEndFromRefMonth(refMonth){
+    const [y,m] = refMonth.split('-').map(Number);
+    let ny = y, nm = m+1;
+    if (nm > 12){ nm = 1; ny += 1; }
+    return new Date(ny, nm-1, 15);
+  }
+  function shiftRefMonth(refMonth, delta){
+    let [y,m] = refMonth.split('-').map(Number);
+    m += delta;
+    while(m>12){ m-=12; y+=1; }
+    while(m<1){ m+=12; y-=1; }
+    return y + '-' + pad2(m);
+  }
+
+  // Load persisted state (férias overrides + último mês de referência)
+  let state = { refMonth: refMonthFromDate(fromISO(meta.inicio_periodo)), ferias: {}, overrides: {}, customEmployees: [], employeeEdits: {}, deletedEmployees: [] };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (saved) state = Object.assign(state, saved);
+  } catch(e){}
+
+  // Seed initial férias from spreadsheet if not already overridden
+  ROSTER.employees.forEach(e => {
+    const key = String(e.matricula);
+    if (state.ferias[key] === undefined && e.inicio_ferias && e.fim_ferias) {
+      state.ferias[key] = { inicio: e.inicio_ferias, fim: e.fim_ferias };
+    }
+  });
+
+  function persist(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // ---- Auth (modo edição) ----
+  let isEditMode = sessionStorage.getItem(AUTH_KEY) === '1';
+  let pendingEmployee = null;
+  let pendingCell = null;
+  let pendingEmployeeEdit = null;
+  let pendingNewEmployee = false;
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  const btnAuth = document.getElementById('btn-auth');
+  const authOverlay = document.getElementById('auth-overlay');
+  const authPassword = document.getElementById('auth-password');
+  const authError = document.getElementById('auth-error');
+  const authSub = document.getElementById('auth-sub');
+
+  function updateAuthUI(){
+    if (isEditMode){
+      btnAuth.textContent = '🔓 Modo edição (sair)';
+      btnAuth.classList.add('unlocked');
+    } else {
+      btnAuth.textContent = '🔒 Modo visualização';
+      btnAuth.classList.remove('unlocked');
+    }
+  }
+
+  function openAuthModal(){
+    authPassword.value = '';
+    authError.style.display = 'none';
+    authSub.textContent = pendingCell
+      ? 'Digite a senha para marcar o dia de ' + pendingCell.emp.nome + '.'
+      : (pendingEmployeeEdit
+        ? 'Digite a senha para editar os dados de ' + pendingEmployeeEdit.nome + '.'
+        : (pendingNewEmployee
+          ? 'Digite a senha para cadastrar um novo colaborador.'
+          : (pendingEmployee
+            ? 'Digite a senha para lançar férias de ' + pendingEmployee.nome + '.'
+            : 'Digite a senha para habilitar lançamentos. Sem a senha, a escala fica só para visualização.')));
+    authOverlay.classList.add('open');
+    setTimeout(() => authPassword.focus(), 50);
+  }
+  function closeAuthModal(){
+    authOverlay.classList.remove('open');
+    pendingEmployee = null;
+    pendingCell = null;
+    pendingEmployeeEdit = null;
+    pendingNewEmployee = false;
+  }
+
+  btnAuth.addEventListener('click', () => {
+    if (isEditMode){
+      if (confirm('Sair do modo edição e voltar para somente visualização?')){
+        isEditMode = false;
+        sessionStorage.removeItem(AUTH_KEY);
+        updateAuthUI();
+      }
+    } else {
+      pendingEmployee = null;
+      pendingCell = null;
+      pendingEmployeeEdit = null;
+      pendingNewEmployee = false;
+      openAuthModal();
+    }
+  });
+  document.getElementById('auth-cancel').addEventListener('click', closeAuthModal);
+  authOverlay.addEventListener('click', (e) => { if (e.target.id === 'auth-overlay') closeAuthModal(); });
+  authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
+  document.getElementById('auth-submit').addEventListener('click', async () => {
+    const hash = await sha256Hex(authPassword.value);
+    if (hash === EDIT_PASSWORD_HASH){
+      isEditMode = true;
+      sessionStorage.setItem(AUTH_KEY, '1');
+      updateAuthUI();
+      const emp = pendingEmployee;
+      const cell = pendingCell;
+      const empEdit = pendingEmployeeEdit;
+      const isNew = pendingNewEmployee;
+      closeAuthModal();
+      if (cell) openDayModal(cell.emp, cell.date);
+      else if (empEdit) openEmployeeModal(empEdit);
+      else if (isNew) openEmployeeModal(null);
+      else if (emp) openFeriasModal(emp);
+    } else {
+      authError.style.display = 'block';
+    }
+  });
+  updateAuthUI();
+
+  function groupOnSunday(sundayDate){
+    // sundayDate must be an actual Sunday
+    const diffDays = Math.round((sundayDate - ANCHOR_DATE) / 86400000);
+    const sundaysSinceAnchor = diffDays / 7; // exact integer since both are Sundays
+    return mod(sundaysSinceAnchor + (ANCHOR_GROUP - 1), 3) + 1;
+  }
+
+  function buildDates(refMonth){
+    const start = periodStartFromRefMonth(refMonth);
+    const end = periodEndFromRefMonth(refMonth);
+    const dates = [];
+    let d = start;
+    while (d <= end){
+      dates.push(d);
+      d = addDays(d, 1);
+    }
+    return dates;
+  }
+
+  function overrideKey(matricula, iso){ return matricula + ':' + iso; }
+
+  const COD_TO_LABEL = { seg:'Segunda', ter:'Terça', qua:'Quarta', qui:'Quinta', sex:'Sexta', 'sáb':'Sábado' };
+
+  function getAllEmployees(){
+    const base = ROSTER.employees
+      .filter(e => !state.deletedEmployees.includes(e.matricula))
+      .map(e => {
+        const edit = state.employeeEdits[String(e.matricula)];
+        return edit ? Object.assign({}, e, edit, {_source:'base'}) : Object.assign({}, e, {_source:'base'});
+      });
+    const custom = state.customEmployees.map(e => {
+      const edit = state.employeeEdits[String(e.matricula)];
+      return edit ? Object.assign({}, e, edit, {_source:'custom'}) : Object.assign({}, e, {_source:'custom'});
+    });
+    return [...base, ...custom];
+  }
+
+  function computeCell(emp, date, feriasRange){
+    const iso = toISO(date);
+    const ov = state.overrides[overrideKey(emp.matricula, iso)];
+    if (ov) return ov;
+    if (feriasRange && iso >= feriasRange.inicio && iso <= feriasRange.fim) return 'D';
+    const dow = date.getDay(); // 0=Sunday
+    if (dow === 0){
+      const g = groupOnSunday(date);
+      return (g === emp.grupo) ? 'DSR' : 'T';
+    }
+    return (DOW_ABBR[dow] === emp.cod) ? 'DSR' : 'T';
+  }
+
+  // ---- UI wiring ----
+  document.getElementById('meta-gestor').textContent = meta.gestor || '—';
+  document.getElementById('meta-cr').textContent = meta.centro_resultado || '—';
+
+  const refMonthInput = document.getElementById('ref-month');
+  const periodoAuto = document.getElementById('periodo-auto');
+  const grupoAuto = document.getElementById('grupo-auto');
+  const pageTitle = document.getElementById('page-title');
+  const trHead = document.querySelector('.dow-row');
+  const tbody = document.getElementById('table-body');
+  const noResults = document.getElementById('no-results');
+  const counter = document.getElementById('result-counter');
+  const shiftSelect = document.getElementById('shift-select');
+
+  function refreshShiftOptions(){
+    const cur = shiftSelect.value;
+    const shifts = [...new Set(getAllEmployees().map(e => e.horario))].sort();
+    shiftSelect.innerHTML = '<option value="all">Todos os horários</option>';
+    shifts.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      shiftSelect.appendChild(opt);
+    });
+    if (shifts.includes(cur)) shiftSelect.value = cur;
+  }
+  refreshShiftOptions();
+
+  let currentDates = [];
+  const todayStr = toISO(new Date());
+
+  function periodLabel(dates){
+    const fmt = d => d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+    return fmt(dates[0]) + ' a ' + fmt(dates[dates.length-1]);
+  }
+
+  function renderHeader(dates){
+    // remove existing day-col ths
+    trHead.querySelectorAll('.day-col').forEach(el => el.remove());
+    dates.forEach(d => {
+      const iso = toISO(d);
+      const dow = d.getDay();
+      const th = document.createElement('th');
+      th.className = 'day-col' + (dow===0 ? ' sunday' : '') + (iso===todayStr ? ' today' : '');
+      th.innerHTML = `<span class="dnum">${String(d.getDate()).padStart(2,'0')}</span><span class="dname">${DOW_ABBR[dow]}</span>`;
+      trHead.appendChild(th);
+    });
+  }
+
+  function openFeriasModal(emp){
+    const key = String(emp.matricula);
+    const cur = state.ferias[key];
+    document.getElementById('modal-name').textContent = 'Férias — ' + emp.nome;
+    document.getElementById('modal-inicio').value = cur ? cur.inicio : '';
+    document.getElementById('modal-fim').value = cur ? cur.fim : '';
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('modal-overlay').dataset.matricula = key;
+  }
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal();
+  });
+  document.getElementById('modal-save').addEventListener('click', () => {
+    const key = document.getElementById('modal-overlay').dataset.matricula;
+    const inicio = document.getElementById('modal-inicio').value;
+    const fim = document.getElementById('modal-fim').value;
+    if (!inicio || !fim){ alert('Informe as duas datas.'); return; }
+    if (fim < inicio){ alert('A data final não pode ser antes do início.'); return; }
+    state.ferias[key] = { inicio, fim };
+    persist();
+    closeModal();
+    render();
+  });
+  document.getElementById('modal-clear').addEventListener('click', () => {
+    const key = document.getElementById('modal-overlay').dataset.matricula;
+    delete state.ferias[key];
+    persist();
+    closeModal();
+    render();
+  });
+
+  // ---- Modal de marcação diária (FX / FF / BH) ----
+  const dayOverlay = document.getElementById('day-overlay');
+  let dayModalTarget = null; // { emp, date, iso }
+
+  function openDayModal(emp, date){
+    const iso = toISO(date);
+    dayModalTarget = { emp, date, iso };
+    const dLabel = date.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
+    document.getElementById('day-modal-name').textContent = emp.nome + ' — ' + dLabel;
+    const cur = state.overrides[overrideKey(emp.matricula, iso)];
+    document.getElementById('day-modal-sub').textContent = cur
+      ? 'Marcação atual: ' + cur + '. Escolha uma nova opção ou volte ao normal.'
+      : 'Escolha o que marcar neste dia.';
+    dayOverlay.classList.add('open');
+  }
+  function closeDayModal(){
+    dayOverlay.classList.remove('open');
+    dayModalTarget = null;
+  }
+  document.getElementById('day-cancel').addEventListener('click', closeDayModal);
+  dayOverlay.addEventListener('click', (e) => { if (e.target.id === 'day-overlay') closeDayModal(); });
+  document.querySelectorAll('.day-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!dayModalTarget) return;
+      const key = overrideKey(dayModalTarget.emp.matricula, dayModalTarget.iso);
+      const code = btn.dataset.code;
+      if (code){ state.overrides[key] = code; }
+      else { delete state.overrides[key]; }
+      persist();
+      closeDayModal();
+      render();
+    });
+  });
+
+  // ---- Cadastro / edição de colaborador ----
+  const empOverlay = document.getElementById('emp-overlay');
+  const empNome = document.getElementById('emp-nome');
+  const empMatricula = document.getElementById('emp-matricula');
+  const empFuncao = document.getElementById('emp-funcao');
+  const empHorario = document.getElementById('emp-horario');
+  const empGrupo = document.getElementById('emp-grupo');
+  const empFolga = document.getElementById('emp-folga');
+  const empError = document.getElementById('emp-error');
+  const empDeleteBtn = document.getElementById('emp-delete');
+  let empModalTarget = null; // employee being edited, or null for new
+
+  function openEmployeeModal(emp){
+    empModalTarget = emp;
+    empError.style.display = 'none';
+    document.getElementById('emp-modal-title').textContent = emp ? 'Editar colaborador' : 'Novo colaborador';
+    empNome.value = emp ? emp.nome : '';
+    empMatricula.value = emp ? emp.matricula : '';
+    empMatricula.disabled = !!emp; // matrícula não muda em edição, evita perder o histórico já lançado
+    empFuncao.value = emp ? (emp.funcao || '') : '';
+    empHorario.value = emp ? (emp.horario || '') : '';
+    empGrupo.value = emp ? String(emp.grupo) : '1';
+    empFolga.value = emp ? (emp.cod || 'seg') : 'seg';
+    empDeleteBtn.style.display = emp ? 'inline-block' : 'none';
+    empOverlay.classList.add('open');
+  }
+  function closeEmployeeModal(){
+    empOverlay.classList.remove('open');
+    empModalTarget = null;
+  }
+  document.getElementById('emp-cancel').addEventListener('click', closeEmployeeModal);
+  empOverlay.addEventListener('click', (e) => { if (e.target.id === 'emp-overlay') closeEmployeeModal(); });
+  document.getElementById('btn-add-employee').addEventListener('click', () => {
+    if (isEditMode){ openEmployeeModal(null); }
+    else { pendingNewEmployee = true; pendingEmployeeEdit = null; pendingEmployee = null; pendingCell = null; openAuthModal(); }
+  });
+
+  document.getElementById('emp-save').addEventListener('click', () => {
+    const nome = empNome.value.trim();
+    const matriculaRaw = empMatricula.value.trim();
+    const matricula = Number(matriculaRaw);
+    const funcao = empFuncao.value.trim();
+    const horario = empHorario.value.trim();
+    const grupo = Number(empGrupo.value);
+    const cod = empFolga.value;
+    const folga_semanal = COD_TO_LABEL[cod];
+
+    if (!nome || !matriculaRaw || !Number.isFinite(matricula) || matricula <= 0){
+      empError.textContent = 'Preencha nome e matrícula corretamente (matrícula deve ser numérica).';
+      empError.style.display = 'block';
+      return;
+    }
+    if (!horario){
+      empError.textContent = 'Informe o horário do colaborador.';
+      empError.style.display = 'block';
+      return;
+    }
+
+    if (empModalTarget){
+      // Editando colaborador existente — matrícula é fixa (campo desabilitado)
+      const key = String(empModalTarget.matricula);
+      state.employeeEdits[key] = { nome, funcao, horario, grupo, folga_semanal, cod };
+    } else {
+      // Novo colaborador — checar duplicidade de matrícula
+      const exists = getAllEmployees().some(e => e.matricula === matricula);
+      if (exists){
+        empError.textContent = 'Já existe um colaborador com essa matrícula.';
+        empError.style.display = 'block';
+        return;
+      }
+      state.customEmployees.push({ matricula, nome, funcao, horario, grupo, folga_semanal, cod, inicio_ferias: null, fim_ferias: null });
+    }
+    persist();
+    closeEmployeeModal();
+    refreshShiftOptions();
+    render();
+  });
+
+  empDeleteBtn.addEventListener('click', () => {
+    if (!empModalTarget) return;
+    if (!confirm('Excluir ' + empModalTarget.nome + ' da escala? Os lançamentos (férias/marcações) desse colaborador também serão removidos.')) return;
+    const key = String(empModalTarget.matricula);
+    if (empModalTarget._source === 'custom'){
+      state.customEmployees = state.customEmployees.filter(e => e.matricula !== empModalTarget.matricula);
+    } else {
+      state.deletedEmployees.push(empModalTarget.matricula);
+    }
+    delete state.employeeEdits[key];
+    delete state.ferias[key];
+    Object.keys(state.overrides).forEach(k => { if (k.startsWith(key + ':')) delete state.overrides[k]; });
+    persist();
+    closeEmployeeModal();
+    refreshShiftOptions();
+    render();
+  });
+
+  function render(){
+    const refMonth = refMonthInput.value;
+    state.refMonth = refMonth;
+    persist();
+
+    currentDates = buildDates(refMonth);
+    renderHeader(currentDates);
+
+    const firstSunday = currentDates.find(d => d.getDay() === 0);
+    const g1 = firstSunday ? groupOnSunday(firstSunday) : '—';
+    grupoAuto.value = 'Grupo ' + g1;
+    periodoAuto.value = periodLabel(currentDates) + ' (' + currentDates.length + ' dias)';
+    pageTitle.textContent = 'Maracanã — Período ' + periodLabel(currentDates);
+
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    const activeGroup = document.querySelector('.chip.active').dataset.group;
+    const activeShift = shiftSelect.value;
+    const allEmployees = getAllEmployees();
+    document.getElementById('meta-count').textContent = allEmployees.length;
+
+    const filtered = allEmployees.filter(e => {
+      const matchQ = !q || e.nome.toLowerCase().includes(q) || String(e.matricula).includes(q);
+      const matchGroup = activeGroup === 'all' || String(e.grupo) === activeGroup;
+      const matchShift = activeShift === 'all' || e.horario === activeShift;
+      return matchQ && matchGroup && matchShift;
+    });
+
+    tbody.innerHTML = '';
+    filtered.forEach(e => {
+      const key = String(e.matricula);
+      const feriasRange = state.ferias[key];
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td');
+      tdName.className = 'sticky-col name-cell';
+      tdName.innerHTML = `<span class="group-pill g${e.grupo}" style="margin-right:6px;">${e.grupo}</span>${e.nome}<button class="edit-emp-btn" title="Editar colaborador">✏️</button><small>Mat. ${e.matricula} · Folga fixa: ${e.folga_semanal || '—'}</small>`;
+      tdName.querySelector('.edit-emp-btn').addEventListener('click', () => {
+        if (isEditMode){ openEmployeeModal(e); }
+        else { pendingEmployeeEdit = e; pendingCell = null; pendingEmployee = null; openAuthModal(); }
+      });
+      tr.appendChild(tdName);
+
+      const tdShift = document.createElement('td');
+      tdShift.className = 'sticky-col2 shift-cell';
+      tdShift.textContent = e.horario;
+      tr.appendChild(tdShift);
+
+      const tdAction = document.createElement('td');
+      tdAction.className = 'sticky-col3 action-cell';
+      const btn = document.createElement('button');
+      btn.className = 'ferias-btn' + (feriasRange ? ' has-ferias' : '');
+      const lockIcon = isEditMode ? '' : '🔒';
+      btn.textContent = feriasRange
+        ? (lockIcon + ' ' + feriasRange.inicio.slice(8,10)+'/'+feriasRange.inicio.slice(5,7)+'–'+feriasRange.fim.slice(8,10)+'/'+feriasRange.fim.slice(5,7))
+        : (lockIcon ? lockIcon : '+ Férias');
+      btn.addEventListener('click', () => {
+        if (isEditMode){ openFeriasModal(e); }
+        else { pendingEmployee = e; pendingCell = null; openAuthModal(); }
+      });
+      tdAction.appendChild(btn);
+      tr.appendChild(tdAction);
+
+      currentDates.forEach(d => {
+        const td = document.createElement('td');
+        const iso = toISO(d);
+        const val = computeCell(e, d, feriasRange);
+        td.classList.add('day-cell');
+        if (iso === todayStr) td.classList.add('col-today');
+        if (d.getDay() === 0) td.classList.add('cell-sunday');
+        if (val === 'D'){ td.textContent='D'; td.classList.add('cell-ferias'); }
+        else if (val === 'DSR'){ td.textContent='DSR'; td.classList.add('cell-dsr'); }
+        else if (val === 'FX'){ td.textContent='FX'; td.classList.add('cell-fx'); }
+        else if (val === 'FF'){ td.textContent='FF'; td.classList.add('cell-ff'); }
+        else if (val === 'BH'){ td.textContent='BH'; td.classList.add('cell-bh'); }
+        else { td.textContent='T'; td.classList.add('cell-t'); }
+        td.addEventListener('click', () => {
+          if (isEditMode){ openDayModal(e, d); }
+          else { pendingCell = { emp: e, date: d }; pendingEmployee = null; openAuthModal(); }
+        });
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    noResults.style.display = filtered.length ? 'none' : 'block';
+    counter.textContent = filtered.length + ' de ' + allEmployees.length + ' colaboradores · período de ' + currentDates.length + ' dias';
+  }
+
+  // Period navigation
+  refMonthInput.value = state.refMonth || refMonthFromDate(fromISO(meta.inicio_periodo));
+  document.getElementById('btn-prev').addEventListener('click', () => {
+    refMonthInput.value = shiftRefMonth(refMonthInput.value, -1);
+    render();
+  });
+  document.getElementById('btn-next').addEventListener('click', () => {
+    refMonthInput.value = shiftRefMonth(refMonthInput.value, 1);
+    render();
+  });
+  document.getElementById('btn-hoje').addEventListener('click', () => {
+    refMonthInput.value = refMonthFromDate(new Date());
+    render();
+  });
+  document.getElementById('btn-print').addEventListener('click', () => {
+    window.print();
+  });
+  refMonthInput.addEventListener('change', render);
+  document.getElementById('search').addEventListener('input', render);
+  shiftSelect.addEventListener('change', render);
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
