@@ -313,7 +313,7 @@
     @page{ size: landscape; margin: 8mm; }
     body{background:#fff;font-size:9px;}
     .period-bar, .controls, footer, .modal-overlay,
-    #btn-prev, #btn-next, #btn-hoje, #btn-print, #btn-auth,
+    #btn-prev, #btn-next, #btn-hoje, #btn-print, #btn-auth, #btn-users,
     #btn-add-employee, .edit-emp-btn, .ferias-btn{ display:none !important; }
     .topbar{padding:10px 14px;}
     .meta-grid{font-size:.7rem;}
@@ -364,6 +364,7 @@
   <button class="btn secondary" id="btn-hoje">Ir para hoje</button>
   <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
   <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
+  <button class="btn secondary" id="btn-users" style="display:none;">👤 Usuários / senha</button>
   <span class="hint">O período sempre vai do dia 16 do mês escolhido até o dia 15 do mês seguinte, igual à planilha. A rotação dos domingos é calculada automaticamente a partir de 16/08/2026 (grupo 2). Clique em qualquer célula do dia (no modo edição) para marcar FX, FF ou BH.</span>
 </div>
 
@@ -410,19 +411,60 @@
 
 <footer>Escala calculada dinamicamente (mesma lógica da planilha ESCALA_IFOOD) · férias e período ficam salvos neste navegador.</footer>
 
-<!-- Modal de senha (modo edição) -->
+<!-- Modal de login (modo edição) -->
 <div class="modal-overlay" id="auth-overlay">
   <div class="modal">
     <h3>Modo edição</h3>
-    <p class="sub" id="auth-sub">Digite a senha para lançar/editar férias. Sem a senha, a escala fica só para visualização.</p>
+    <p class="sub" id="auth-sub">Entre com usuário e senha para lançar/editar. Sem login, a escala fica só para visualização.</p>
+    <div class="field">
+      <label>Usuário</label>
+      <input type="text" id="auth-username" autocomplete="off">
+    </div>
     <div class="field">
       <label>Senha</label>
       <input type="password" id="auth-password" autocomplete="off">
     </div>
-    <p class="sub" id="auth-error" style="display:none;color:#a3341f;">Senha incorreta. Tente novamente.</p>
+    <p class="sub" id="auth-error" style="display:none;color:#a3341f;">Usuário ou senha incorretos. Tente novamente.</p>
     <div class="modal-actions">
       <button class="btn ghost" id="auth-cancel">Cancelar</button>
       <button class="btn" id="auth-submit">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de gerenciamento de usuários -->
+<div class="modal-overlay" id="users-overlay">
+  <div class="modal">
+    <h3>Usuários e senha</h3>
+    <p class="sub">Logado como <strong id="users-current"></strong>.</p>
+
+    <div class="field">
+      <label>Nova senha para <span id="users-pw-target"></span></label>
+      <input type="password" id="users-new-password" autocomplete="off" placeholder="Deixe em branco para não alterar">
+    </div>
+    <button class="btn secondary" id="users-change-pw-btn" style="width:100%;margin-bottom:14px;">Salvar nova senha</button>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:10px 0 14px;">
+
+    <p class="sub" style="margin-bottom:8px;"><strong>Cadastrar novo usuário</strong></p>
+    <div class="field">
+      <label>Usuário</label>
+      <input type="text" id="users-new-username" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="users-new-user-password" autocomplete="off">
+    </div>
+    <button class="btn secondary" id="users-add-btn" style="width:100%;">+ Adicionar usuário</button>
+
+    <p class="sub" id="users-error" style="display:none;color:#a3341f;margin-top:10px;"></p>
+    <p class="sub" id="users-success" style="display:none;color:#1e6b41;margin-top:10px;"></p>
+
+    <p class="sub" style="margin-top:14px;font-size:.72rem;">Usuários cadastrados: <span id="users-list"></span></p>
+    <p class="sub" style="margin-top:6px;font-size:.68rem;color:var(--muted);">⚠️ Usuários criados aqui ficam salvos só neste navegador/aparelho. Para funcionar em qualquer dispositivo que abra o link, peça para o Claude regravar o arquivo com o novo usuário fixo.</p>
+
+    <div class="modal-actions">
+      <button class="btn ghost" id="users-close">Fechar</button>
     </div>
   </div>
 </div>
@@ -529,9 +571,14 @@
   const ANCHOR_GROUP = 2;
   const DOW_ABBR = ['dom','seg','ter','qua','qui','sex','sáb'];
   const STORAGE_KEY = 'escala286_state_v2';
+  const USERS_KEY = 'escala286_users_v1';
   const AUTH_KEY = 'escala286_edit_unlocked';
-  // Hash SHA-256 da senha de edição (senha padrão: escala286 — troque pedindo pro Claude gerar outro hash)
-  const EDIT_PASSWORD_HASH = '0b085eac372ef94e0d1ea9d6d4d81ede04217bbc32f63a60e86c031bcbc5a8ca';
+  const AUTH_USER_KEY = 'escala286_edit_username';
+  // Usuários padrão embutidos no arquivo (válidos em qualquer aparelho que abrir o link).
+  // Usuários criados pela tela "Usuários / senha" ficam salvos só no navegador que os criou.
+  const DEFAULT_USERS = [
+    { username: 'diego', hash: '43f2f024e62e96dee1ca9a080e8a3da36abb0970d5cabde316ea2f57571e836e' }
+  ];
 
   function toISO(d){ return d.toISOString().slice(0,10); }
   function fromISO(s){ return new Date(s + 'T00:00:00'); }
@@ -582,8 +629,9 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  // ---- Auth (modo edição) ----
+  // ---- Auth (modo edição, multiusuário) ----
   let isEditMode = sessionStorage.getItem(AUTH_KEY) === '1';
+  let currentUsername = sessionStorage.getItem(AUTH_USER_KEY) || null;
   let pendingEmployee = null;
   let pendingCell = null;
   let pendingEmployeeEdit = null;
@@ -595,36 +643,52 @@
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
 
+  // Usuários criados/alterados neste navegador ficam salvos aqui (sobrepõem os padrão por username)
+  let localUsers = [];
+  try { localUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch(e){ localUsers = []; }
+  function persistUsers(){ localStorage.setItem(USERS_KEY, JSON.stringify(localUsers)); }
+  function getAllUsers(){
+    const map = {};
+    DEFAULT_USERS.forEach(u => map[u.username.toLowerCase()] = u.hash);
+    localUsers.forEach(u => map[u.username.toLowerCase()] = u.hash);
+    return map;
+  }
+
   const btnAuth = document.getElementById('btn-auth');
+  const btnUsers = document.getElementById('btn-users');
   const authOverlay = document.getElementById('auth-overlay');
+  const authUsername = document.getElementById('auth-username');
   const authPassword = document.getElementById('auth-password');
   const authError = document.getElementById('auth-error');
   const authSub = document.getElementById('auth-sub');
 
   function updateAuthUI(){
     if (isEditMode){
-      btnAuth.textContent = '🔓 Modo edição (sair)';
+      btnAuth.textContent = '🔓 ' + currentUsername + ' (sair)';
       btnAuth.classList.add('unlocked');
+      btnUsers.style.display = 'inline-block';
     } else {
       btnAuth.textContent = '🔒 Modo visualização';
       btnAuth.classList.remove('unlocked');
+      btnUsers.style.display = 'none';
     }
   }
 
   function openAuthModal(){
+    authUsername.value = '';
     authPassword.value = '';
     authError.style.display = 'none';
     authSub.textContent = pendingCell
-      ? 'Digite a senha para marcar o dia de ' + pendingCell.emp.nome + '.'
+      ? 'Entre com usuário e senha para marcar o dia de ' + pendingCell.emp.nome + '.'
       : (pendingEmployeeEdit
-        ? 'Digite a senha para editar os dados de ' + pendingEmployeeEdit.nome + '.'
+        ? 'Entre com usuário e senha para editar os dados de ' + pendingEmployeeEdit.nome + '.'
         : (pendingNewEmployee
-          ? 'Digite a senha para cadastrar um novo colaborador.'
+          ? 'Entre com usuário e senha para cadastrar um novo colaborador.'
           : (pendingEmployee
-            ? 'Digite a senha para lançar férias de ' + pendingEmployee.nome + '.'
-            : 'Digite a senha para habilitar lançamentos. Sem a senha, a escala fica só para visualização.')));
+            ? 'Entre com usuário e senha para lançar férias de ' + pendingEmployee.nome + '.'
+            : 'Entre com usuário e senha para habilitar lançamentos. Sem login, a escala fica só para visualização.')));
     authOverlay.classList.add('open');
-    setTimeout(() => authPassword.focus(), 50);
+    setTimeout(() => authUsername.focus(), 50);
   }
   function closeAuthModal(){
     authOverlay.classList.remove('open');
@@ -638,7 +702,9 @@
     if (isEditMode){
       if (confirm('Sair do modo edição e voltar para somente visualização?')){
         isEditMode = false;
+        currentUsername = null;
         sessionStorage.removeItem(AUTH_KEY);
+        sessionStorage.removeItem(AUTH_USER_KEY);
         updateAuthUI();
       }
     } else {
@@ -653,10 +719,15 @@
   authOverlay.addEventListener('click', (e) => { if (e.target.id === 'auth-overlay') closeAuthModal(); });
   authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
   document.getElementById('auth-submit').addEventListener('click', async () => {
+    const uname = authUsername.value.trim().toLowerCase();
+    const users = getAllUsers();
+    const expectedHash = users[uname];
     const hash = await sha256Hex(authPassword.value);
-    if (hash === EDIT_PASSWORD_HASH){
+    if (uname && expectedHash && hash === expectedHash){
       isEditMode = true;
+      currentUsername = uname;
       sessionStorage.setItem(AUTH_KEY, '1');
+      sessionStorage.setItem(AUTH_USER_KEY, uname);
       updateAuthUI();
       const emp = pendingEmployee;
       const cell = pendingCell;
@@ -672,6 +743,85 @@
     }
   });
   updateAuthUI();
+
+  // ---- Gerenciar usuários / senha ----
+  const usersOverlay = document.getElementById('users-overlay');
+  const usersCurrent = document.getElementById('users-current');
+  const usersPwTarget = document.getElementById('users-pw-target');
+  const usersNewPassword = document.getElementById('users-new-password');
+  const usersNewUsername = document.getElementById('users-new-username');
+  const usersNewUserPassword = document.getElementById('users-new-user-password');
+  const usersError = document.getElementById('users-error');
+  const usersSuccess = document.getElementById('users-success');
+  const usersListEl = document.getElementById('users-list');
+
+  function refreshUsersModal(){
+    usersCurrent.textContent = currentUsername || '—';
+    usersPwTarget.textContent = currentUsername || '';
+    usersNewPassword.value = '';
+    usersNewUsername.value = '';
+    usersNewUserPassword.value = '';
+    usersError.style.display = 'none';
+    usersSuccess.style.display = 'none';
+    const all = Object.keys(getAllUsers());
+    usersListEl.textContent = all.join(', ');
+  }
+
+  btnUsers.addEventListener('click', () => {
+    refreshUsersModal();
+    usersOverlay.classList.add('open');
+  });
+  document.getElementById('users-close').addEventListener('click', () => usersOverlay.classList.remove('open'));
+  usersOverlay.addEventListener('click', (e) => { if (e.target.id === 'users-overlay') usersOverlay.classList.remove('open'); });
+
+  document.getElementById('users-change-pw-btn').addEventListener('click', async () => {
+    usersError.style.display = 'none';
+    usersSuccess.style.display = 'none';
+    const newPw = usersNewPassword.value;
+    if (!newPw || newPw.length < 4){
+      usersError.textContent = 'Digite uma senha com pelo menos 4 caracteres.';
+      usersError.style.display = 'block';
+      return;
+    }
+    const hash = await sha256Hex(newPw);
+    const idx = localUsers.findIndex(u => u.username.toLowerCase() === currentUsername);
+    if (idx >= 0){ localUsers[idx].hash = hash; }
+    else { localUsers.push({ username: currentUsername, hash }); }
+    persistUsers();
+    usersSuccess.textContent = 'Senha atualizada para "' + currentUsername + '" neste navegador.';
+    usersSuccess.style.display = 'block';
+    usersNewPassword.value = '';
+  });
+
+  document.getElementById('users-add-btn').addEventListener('click', async () => {
+    usersError.style.display = 'none';
+    usersSuccess.style.display = 'none';
+    const uname = usersNewUsername.value.trim().toLowerCase();
+    const pw = usersNewUserPassword.value;
+    if (!uname){
+      usersError.textContent = 'Informe um nome de usuário.';
+      usersError.style.display = 'block';
+      return;
+    }
+    if (!pw || pw.length < 4){
+      usersError.textContent = 'Digite uma senha com pelo menos 4 caracteres.';
+      usersError.style.display = 'block';
+      return;
+    }
+    if (getAllUsers()[uname]){
+      usersError.textContent = 'Já existe um usuário com esse nome.';
+      usersError.style.display = 'block';
+      return;
+    }
+    const hash = await sha256Hex(pw);
+    localUsers.push({ username: uname, hash });
+    persistUsers();
+    usersSuccess.textContent = 'Usuário "' + uname + '" criado neste navegador.';
+    usersSuccess.style.display = 'block';
+    usersNewUsername.value = '';
+    usersNewUserPassword.value = '';
+    refreshUsersModal();
+  });
 
   function groupOnSunday(sundayDate){
     // sundayDate must be an actual Sunday
