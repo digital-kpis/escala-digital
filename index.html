@@ -117,6 +117,7 @@
   }
   .btn:hover{filter:brightness(1.06);}
   .lock-btn{background:transparent;border:1px solid #3a4e63;color:#c9d2da;}
+  .sync-badge{font-size:.72rem;color:#c9d2da;padding:6px 4px;white-space:nowrap;align-self:center;}
   .lock-btn.unlocked{background:var(--green-strong);border-color:var(--green-strong);color:#fff;}
   .hint{font-size:.72rem;color:#8ea0b3;max-width:260px;line-height:1.4;}
 
@@ -365,7 +366,7 @@
     body{background:#fff;font-size:9px;}
     .period-bar, .controls, footer, .modal-overlay,
     #btn-prev, #btn-next, #btn-hoje, #btn-print, #btn-auth, #btn-users,
-    #btn-add-employee, .edit-emp-btn, .ferias-btn{ display:none !important; }
+    #btn-add-employee, .edit-emp-btn, .ferias-btn, #sync-badge{ display:none !important; }
     .topbar{padding:10px 14px;}
     .meta-grid{font-size:.7rem;}
     .wrap{margin:0;padding:0;}
@@ -421,6 +422,7 @@
     <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
     <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
     <button class="btn secondary" id="btn-users" style="display:none;">👤 Usuários / senha</button>
+    <span class="sync-badge" id="sync-badge">🟡 Conectando…</span>
   </div>
   <span class="hint">O período sempre vai do dia 16 do mês escolhido até o dia 15 do mês seguinte, igual à planilha. A rotação dos domingos é calculada automaticamente a partir de 16/08/2026 (grupo 2). Clique em qualquer célula do dia (no modo edição) para marcar FX, FF ou BH.</span>
 </div>
@@ -621,6 +623,23 @@
 {"meta": {"inicio_periodo": "2026-08-16", "centro_resultado": "0912-935", "grupo_folga_1dom": 2, "gestor": "DIEGO RIBEIRO", "loja": "286 – MARACANÃ"}, "employees": [{"matricula": 7153570, "nome": "Anna Caroline", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5624576, "nome": "Cláudia Regina", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6427510, "nome": "Danillo de Souza", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6005225, "nome": "Francicleide dos Santos", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5885264, "nome": "Joselito Dias Sobreira", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5646375, "nome": "Lizandra Araujo", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": "2026-07-16", "fim_ferias": "2026-07-30"}, {"matricula": 6528910, "nome": "Matheus Carlos", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7026595, "nome": "Maria Eduarda", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6899153, "nome": "Nataniel Sousa", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6755461, "nome": "Simone do Carmo", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7026013, "nome": "Victoria Aquino", "funcao": "Op. Loja", "horario": "07:00 – 15:20", "grupo": 1, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6465951, "nome": "Alfredo Nascimento", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5361060, "nome": "Gabriel Martins", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 4275195, "nome": "Gleyce Kelly", "funcao": "Op. Loja", "horario": "10:00 – 18:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 5568978, "nome": "Felipe Mota", "funcao": "Pleno", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7231784, "nome": "Andrey da Costa", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6926177, "nome": "Alohan da Costa", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7237316, "nome": "Daniele Teixeira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7216165, "nome": "Deivison Vieira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7237308, "nome": "Fernanda Pereira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7029578, "nome": "Jonas Felipe", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7160542, "nome": "Kamili Conceição", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Quinta", "cod": "qui", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7115261, "nome": "Leonard Gerard", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Terça", "cod": "ter", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7029322, "nome": "Marcelo da Silva", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7014252, "nome": "Suelen da Silva", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 1, "folga_semanal": "Sexta", "cod": "sex", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7122659, "nome": "Talia Mesquita", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 7164289, "nome": "Taissa Ferreira", "funcao": "Op. Loja", "horario": "14:00 – 22:20", "grupo": 3, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6259731, "nome": "Guilherme Veras", "funcao": "Op. Loja", "horario": "22:00 – 05:20", "grupo": 1, "folga_semanal": "Quarta", "cod": "qua", "inicio_ferias": null, "fim_ferias": null}, {"matricula": 6739733, "nome": "Lohan Rodrigues", "funcao": "Op. Loja", "horario": "22:00 – 05:20", "grupo": 2, "folga_semanal": "Segunda", "cod": "seg", "inicio_ferias": null, "fim_ferias": null}]}
 </script>
 
+<!-- Firebase (sincronização entre aparelhos) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+  try {
+    firebase.initializeApp({
+      apiKey: "AIzaSyD2qYaUrjyFoJgfNLRTBg-b2t9Yr9GSB3A",
+      authDomain: "escala-dinamica.firebaseapp.com",
+      databaseURL: "https://escala-dinamica-default-rtdb.firebaseio.com",
+      projectId: "escala-dinamica",
+      storageBucket: "escala-dinamica.firebasestorage.app",
+      messagingSenderId: "896362898729",
+      appId: "1:896362898729:web:443ef1f568fc709bf3c338"
+    });
+  } catch(e){ console.warn('Firebase init falhou:', e); }
+</script>
+
 <script>
 (function(){
   const ROSTER = JSON.parse(document.getElementById('roster-data').textContent);
@@ -686,9 +705,53 @@
     }
   });
 
-  function persist(){
+  // ---- Sincronização com Firebase (Realtime Database) ----
+  // Campos sincronizados entre aparelhos: ferias, overrides, customEmployees, employeeEdits, deletedEmployees.
+  // refMonth (qual mês está sendo visualizado) fica só local — cada aparelho navega livre.
+  const SYNCED_FIELDS = ['ferias','overrides','customEmployees','employeeEdits','deletedEmployees'];
+  let fbDb = null;
+  let fbReady = false;
+  const syncBadge = document.getElementById('sync-badge');
+
+  function setSyncBadge(mode){
+    if (mode === 'ok') syncBadge.textContent = '🟢 Sincronizado';
+    else if (mode === 'connecting') syncBadge.textContent = '🟡 Conectando…';
+    else syncBadge.textContent = '🔴 Offline (só neste aparelho)';
+  }
+
+  function localPersist(){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
+
+  function persist(){
+    localPersist();
+    if (fbReady && fbDb){
+      const payload = {};
+      SYNCED_FIELDS.forEach(k => payload[k] = state[k]);
+      fbDb.ref('state').set(payload).catch(err => console.warn('Firebase write falhou:', err));
+    }
+  }
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length){
+      fbDb = firebase.database();
+      fbDb.ref('.info/connected').on('value', snap => {
+        if (snap.val() === true){ fbReady = true; setSyncBadge('ok'); }
+        else { setSyncBadge('connecting'); }
+      });
+      fbDb.ref('state').on('value', snap => {
+        const remote = snap.val();
+        if (remote){
+          SYNCED_FIELDS.forEach(k => { if (remote[k] !== undefined) state[k] = remote[k]; });
+          localPersist();
+          if (typeof render === 'function') render();
+        }
+        fbReady = true;
+      }, err => { console.warn('Firebase leitura falhou:', err); setSyncBadge('offline'); });
+    } else {
+      setSyncBadge('offline');
+    }
+  } catch(e){ console.warn('Firebase indisponível:', e); setSyncBadge('offline'); }
 
   // ---- Auth (modo edição, multiusuário) ----
   let isEditMode = sessionStorage.getItem(AUTH_KEY) === '1';
@@ -704,16 +767,45 @@
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
 
-  // Usuários criados/alterados neste navegador ficam salvos aqui (sobrepõem os padrão por username)
+  // Usuários: cache local (offline) + sincronizados via Firebase quando disponível
   let localUsers = [];
   try { localUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch(e){ localUsers = []; }
-  function persistUsers(){ localStorage.setItem(USERS_KEY, JSON.stringify(localUsers)); }
+  function persistUsersLocal(){ localStorage.setItem(USERS_KEY, JSON.stringify(localUsers)); }
+  function persistUsers(){
+    persistUsersLocal();
+    // fallback: se Firebase não estiver disponível, mantém só local (getAllUsers já usa localUsers)
+  }
   function getAllUsers(){
     const map = {};
     DEFAULT_USERS.forEach(u => map[u.username.toLowerCase()] = u.hash);
     localUsers.forEach(u => map[u.username.toLowerCase()] = u.hash);
     return map;
   }
+  function setUserHash(username, hash){
+    const uname = username.toLowerCase();
+    const idx = localUsers.findIndex(u => u.username.toLowerCase() === uname);
+    if (idx >= 0) localUsers[idx].hash = hash;
+    else localUsers.push({ username: uname, hash });
+    persistUsersLocal();
+    if (fbReady && fbDb){
+      fbDb.ref('users/' + uname).set(hash).catch(err => console.warn('Firebase (usuários) falhou:', err));
+    }
+  }
+  try {
+    if (fbDb){
+      fbDb.ref('users').on('value', snap => {
+        const remote = snap.val();
+        if (remote){
+          Object.keys(remote).forEach(uname => {
+            const idx = localUsers.findIndex(u => u.username.toLowerCase() === uname);
+            if (idx >= 0) localUsers[idx].hash = remote[uname];
+            else localUsers.push({ username: uname, hash: remote[uname] });
+          });
+          persistUsersLocal();
+        }
+      }, err => console.warn('Firebase (usuários) leitura falhou:', err));
+    }
+  } catch(e){}
 
   const btnAuth = document.getElementById('btn-auth');
   const btnUsers = document.getElementById('btn-users');
@@ -845,11 +937,10 @@
       return;
     }
     const hash = await sha256Hex(newPw);
-    const idx = localUsers.findIndex(u => u.username.toLowerCase() === currentUsername);
-    if (idx >= 0){ localUsers[idx].hash = hash; }
-    else { localUsers.push({ username: currentUsername, hash }); }
-    persistUsers();
-    usersSuccess.textContent = 'Senha atualizada para "' + currentUsername + '" neste navegador.';
+    setUserHash(currentUsername, hash);
+    usersSuccess.textContent = fbReady
+      ? 'Senha atualizada para "' + currentUsername + '" — sincronizada, vale em qualquer aparelho.'
+      : 'Senha atualizada para "' + currentUsername + '" neste navegador (sem conexão com o servidor agora).';
     usersSuccess.style.display = 'block';
     usersNewPassword.value = '';
   });
@@ -875,9 +966,10 @@
       return;
     }
     const hash = await sha256Hex(pw);
-    localUsers.push({ username: uname, hash });
-    persistUsers();
-    usersSuccess.textContent = 'Usuário "' + uname + '" criado neste navegador.';
+    setUserHash(uname, hash);
+    usersSuccess.textContent = fbReady
+      ? 'Usuário "' + uname + '" criado — sincronizado, já pode logar em qualquer aparelho.'
+      : 'Usuário "' + uname + '" criado neste navegador (sem conexão com o servidor agora).';
     usersSuccess.style.display = 'block';
     usersNewUsername.value = '';
     usersNewUserPassword.value = '';
