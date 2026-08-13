@@ -997,6 +997,14 @@
 
   function overrideKey(matricula, iso){ return matricula + ':' + iso; }
 
+  // Extrai o horário de início (em minutos) do texto de horário, ex: "07:00 – 15:20" -> 420
+  function shiftStartMinutes(horario){
+    if (!horario) return 9999;
+    const m = String(horario).match(/(\d{1,2}):(\d{2})/);
+    if (!m) return 9999;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+
   const COD_TO_LABEL = { seg:'Segunda', ter:'Terça', qua:'Quarta', qui:'Quinta', sex:'Sexta', 'sáb':'Sábado' };
 
   function getAllEmployees(){
@@ -1264,6 +1272,13 @@
       const matchGroup = activeGroup === 'all' || String(e.grupo) === activeGroup;
       const matchShift = activeShift === 'all' || e.horario === activeShift;
       return matchQ && matchGroup && matchShift;
+    });
+
+    filtered.sort((a, b) => {
+      const ta = shiftStartMinutes(a.horario);
+      const tb = shiftStartMinutes(b.horario);
+      if (ta !== tb) return ta - tb;
+      return a.nome.localeCompare(b.nome, 'pt-BR');
     });
 
     tbody.innerHTML = '';
