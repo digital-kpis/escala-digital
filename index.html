@@ -119,6 +119,9 @@
   .btn:hover{filter:brightness(1.06);}
   .lock-btn{background:transparent;border:1px solid #3a4e63;color:#c9d2da;}
   .sync-badge{font-size:.72rem;color:#c9d2da;padding:6px 4px;white-space:nowrap;align-self:center;}
+
+  .mobile-bar{display:none;}
+  .collapsible-controls{display:contents;}
   .lock-btn.unlocked{background:var(--green-strong);border-color:var(--green-strong);color:#fff;}
   .hint{font-size:.72rem;color:#8ea0b3;max-width:260px;line-height:1.4;}
 
@@ -310,10 +313,22 @@
     body{font-size:14px;}
 
     /* Cabeçalho */
-    .topbar{padding:16px 14px 14px;}
+    .topbar{padding:12px 14px 10px;}
     .meta-grid{display:none;}
-    .title{font-size:1.15rem;}
-    .subtitle{font-size:.78rem;}
+    .title{font-size:1.05rem;}
+    .subtitle{display:none;}
+
+    /* Barra compacta mobile + menu recolhível */
+    .mobile-bar{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      background:#0f1720;color:#f4f1ea;padding:10px 12px;
+      position:sticky;top:0;z-index:25;
+      border-bottom:1px solid #2c3e50;
+    }
+    #mobile-period-label{font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #mobile-menu-toggle{padding:8px 12px;font-size:.72rem;white-space:nowrap;flex:none;}
+    .collapsible-controls{display:none;}
+    .collapsible-controls.open{display:block;}
 
     /* Barra de período: empilha em grupos, sem hint decorativo */
     .period-bar{padding:12px 12px;gap:12px;}
@@ -340,8 +355,17 @@
     .counter{font-size:.7rem;}
 
     /* Tabela: colunas fixas mais estreitas e toques maiores */
-    .wrap{margin:0;padding:0 10px;}
-    .table-shell{max-height:66vh;max-height:66svh;}
+    .wrap{margin:8px 0 0;padding:0 8px;position:relative;}
+    .table-shell{max-height:76vh;max-height:76svh;position:relative;}
+    .wrap::after{
+      content:"";
+      position:absolute;
+      top:0; right:8px; bottom:0;
+      width:18px;
+      background:linear-gradient(to right, transparent, rgba(0,0,0,.10));
+      pointer-events:none;
+      border-radius:0 var(--radius) var(--radius) 0;
+    }
     thead .day-col{min-width:36px;}
     thead .day-col .dnum{font-size:.74rem;}
     thead .day-col .dname{font-size:.56rem;}
@@ -376,7 +400,7 @@
     body{background:#fff;font-size:11px;-webkit-font-smoothing:antialiased;}
     .period-bar, .controls, footer, .modal-overlay,
     #btn-prev, #btn-next, #btn-hoje, #btn-print, #btn-auth, #btn-users,
-    #btn-add-employee, .edit-emp-btn, .ferias-btn, #sync-badge{ display:none !important; }
+    #btn-add-employee, .edit-emp-btn, .ferias-btn, #sync-badge, #mobile-bar{ display:none !important; }
     .topbar{padding:8px 10px;background:var(--navy) !important;}
     .title{font-size:1rem;}
     .subtitle{font-size:.7rem;}
@@ -428,6 +452,12 @@
   </div>
 </div>
 
+<div class="mobile-bar" id="mobile-bar">
+  <span id="mobile-period-label">Carregando…</span>
+  <button class="btn secondary" id="mobile-menu-toggle">☰ Filtros e ações</button>
+</div>
+
+<div class="collapsible-controls" id="collapsible-controls">
 <div class="period-bar">
   <div class="period-fields">
     <div class="field">
@@ -472,6 +502,7 @@
     <button class="btn" id="btn-add-employee">+ Novo colaborador</button>
     <span class="counter" id="result-counter"></span>
   </div>
+</div>
 </div>
 
 <div class="wrap">
@@ -1290,6 +1321,8 @@
     grupoAuto.value = 'Grupo ' + g1;
     periodoAuto.value = periodLabel(currentDates) + ' (' + currentDates.length + ' dias)';
     pageTitle.textContent = 'Maracanã — Período ' + periodLabel(currentDates);
+    const mobileLabel = document.getElementById('mobile-period-label');
+    if (mobileLabel) mobileLabel.textContent = periodLabel(currentDates);
 
     const q = document.getElementById('search').value.trim().toLowerCase();
     const activeGroup = document.querySelector('.chip.active').dataset.group;
@@ -1371,21 +1404,68 @@
 
     noResults.style.display = filtered.length ? 'none' : 'block';
     counter.textContent = filtered.length + ' de ' + allEmployees.length + ' colaboradores · período de ' + currentDates.length + ' dias';
+
+    maybeAutoScrollToday();
+  }
+
+  // No celular, ao entrar num período que contém hoje, rola a tabela horizontalmente
+  // pra trazer a coluna de hoje pra dentro da área visível — evita ter que caçar manualmente.
+  let lastAutoScrollMonth = null;
+  function maybeAutoScrollToday(){
+    if (window.innerWidth > 640) return;
+    if (lastAutoScrollMonth === state.refMonth) return;
+    lastAutoScrollMonth = state.refMonth;
+    const todayIdx = currentDates.findIndex(d => toISO(d) === todayStr);
+    if (todayIdx === -1){
+      const shell = document.querySelector('.table-shell');
+      if (shell) shell.scrollLeft = 0;
+      return;
+    }
+    requestAnimationFrame(() => {
+      const headerCells = document.querySelectorAll('#schedule-table thead .day-col');
+      const targetCell = headerCells[todayIdx];
+      const shell = document.querySelector('.table-shell');
+      if (!targetCell || !shell) return;
+      const stickyCol = document.querySelector('td.sticky-col');
+      const stickyCol2 = document.querySelector('td.sticky-col2');
+      const stickyCol3 = document.querySelector('td.sticky-col3');
+      const stickyWidth = (stickyCol ? stickyCol.offsetWidth : 0) + (stickyCol2 ? stickyCol2.offsetWidth : 0) + (stickyCol3 ? stickyCol3.offsetWidth : 0);
+      shell.scrollLeft = Math.max(0, targetCell.offsetLeft - stickyWidth - 8);
+    });
+  }
+
+  // Menu recolhível (mobile): mostra/esconde período + filtros
+  const collapsibleControls = document.getElementById('collapsible-controls');
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  if (mobileMenuToggle){
+    mobileMenuToggle.addEventListener('click', () => {
+      const isOpen = collapsibleControls.classList.toggle('open');
+      mobileMenuToggle.textContent = isOpen ? '✕ Fechar' : '☰ Filtros e ações';
+    });
   }
 
   // Period navigation
   refMonthInput.value = state.refMonth || refMonthFromDate(fromISO(meta.inicio_periodo));
+  function closeMobileMenuIfOpen(){
+    if (mobileMenuToggle && collapsibleControls.classList.contains('open')){
+      collapsibleControls.classList.remove('open');
+      mobileMenuToggle.textContent = '☰ Filtros e ações';
+    }
+  }
   document.getElementById('btn-prev').addEventListener('click', () => {
     refMonthInput.value = shiftRefMonth(refMonthInput.value, -1);
     render();
+    closeMobileMenuIfOpen();
   });
   document.getElementById('btn-next').addEventListener('click', () => {
     refMonthInput.value = shiftRefMonth(refMonthInput.value, 1);
     render();
+    closeMobileMenuIfOpen();
   });
   document.getElementById('btn-hoje').addEventListener('click', () => {
     refMonthInput.value = refMonthFromDate(new Date());
     render();
+    closeMobileMenuIfOpen();
   });
   document.getElementById('btn-print').addEventListener('click', () => {
     window.print();
