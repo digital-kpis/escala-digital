@@ -305,6 +305,8 @@
     cursor:pointer;
   }
   .day-opt:hover{background:#eeece4;}
+  .day-opt[data-code="T"]{border-color:#c7cdd3;color:#4b535b;}
+  .day-opt[data-code="DSR"]{border-color:#e59b2e;color:#7a3e00;}
   .day-opt[data-code="FX"]{border-color:#e0958a;color:#7a1f0d;}
   .day-opt[data-code="FF"]{border-color:#7ac9be;color:#0d4a42;}
   .day-opt[data-code="BH"]{border-color:#a29ce0;color:#2c2570;}
@@ -620,7 +622,9 @@
     <h3 id="day-modal-name">Marcação do dia</h3>
     <p class="sub" id="day-modal-sub">Escolha o que marcar neste dia.</p>
     <div class="day-options">
-      <button class="day-opt" data-code="">Normal (T/DSR automático)</button>
+      <button class="day-opt" data-code="">↺ Automático (T/DSR calculado)</button>
+      <button class="day-opt" data-code="T">T — Trabalho</button>
+      <button class="day-opt" data-code="DSR">DSR — Folga</button>
       <button class="day-opt" data-code="FX">FX — Falta</button>
       <button class="day-opt" data-code="FF">FF — Folga de feriado</button>
       <button class="day-opt" data-code="BH">BH — Banco de horas</button>
