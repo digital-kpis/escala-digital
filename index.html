@@ -205,8 +205,10 @@
   td.sticky-col3{border-right:1px solid var(--line);}
 
   tbody td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;}
-  tbody td.name-cell{text-align:left;font-weight:600;padding-left:10px;min-width:150px;max-width:150px;line-height:1.25;}
-  tbody td.name-cell small{display:block;font-weight:400;color:var(--muted);font-size:.62rem;}
+  tbody td.name-cell{text-align:left;font-weight:600;padding-left:10px;padding-right:6px;min-width:150px;max-width:150px;line-height:1.25;overflow:hidden;}
+  .name-cell-inner{display:flex;align-items:center;gap:4px;min-width:0;}
+  .name-cell-inner .name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1 1 auto;}
+  tbody td.name-cell small{display:block;font-weight:400;color:var(--muted);font-size:.62rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   tbody td.shift-cell{color:var(--muted);font-size:.66rem;min-width:78px;max-width:78px;white-space:normal;line-height:1.2;}
   tbody td.action-cell{min-width:78px;max-width:78px;padding:6px 4px;}
   tbody tr:nth-child(even) td:not(.sticky-col):not(.sticky-col2):not(.sticky-col3){background:#fbfaf7;}
@@ -248,8 +250,9 @@
   .ferias-btn.has-ferias{background:var(--violet-soft);border-color:#cdb9ea;}
   .ferias-btn:hover{filter:brightness(0.97);}
   .edit-emp-btn{
-    border:none;background:transparent;cursor:pointer;font-size:.72rem;
-    padding:0 2px;margin-left:4px;opacity:.55;vertical-align:middle;
+    border:none;background:transparent;cursor:pointer;font-size:.78rem;
+    padding:2px 3px;opacity:.6;vertical-align:middle;flex:none;
+    min-width:22px;min-height:22px;
   }
   .edit-emp-btn:hover{opacity:1;}
 
@@ -1356,7 +1359,7 @@
 
       const tdName = document.createElement('td');
       tdName.className = 'sticky-col name-cell';
-      tdName.innerHTML = `<span class="group-pill g${e.grupo}" style="margin-right:6px;">${e.grupo}</span>${e.nome}<button class="edit-emp-btn" title="Editar colaborador">✏️</button><small>Mat. ${e.matricula} · Folga fixa: ${e.folga_semanal || '—'}</small>`;
+      tdName.innerHTML = `<div class="name-cell-inner"><span class="group-pill g${e.grupo}">${e.grupo}</span><span class="name-text" title="${e.nome}">${e.nome}</span><button class="edit-emp-btn" title="Editar colaborador">✏️</button></div><small title="Mat. ${e.matricula} · Folga fixa: ${e.folga_semanal || '—'}">Mat. ${e.matricula} · Folga fixa: ${e.folga_semanal || '—'}</small>`;
       tdName.querySelector('.edit-emp-btn').addEventListener('click', () => {
         if (isEditMode){ openEmployeeModal(e); }
         else { pendingEmployeeEdit = e; pendingCell = null; pendingEmployee = null; openAuthModal(); }
