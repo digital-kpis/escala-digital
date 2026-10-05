@@ -440,30 +440,6 @@
     thead{display:table-header-group;} /* repete cabeçalho em cada página, se quebrar */
     tr{page-break-inside:avoid;}
   }
-
-  #print-domingo-area{
-    background:#fff; color:#111; padding:10px; border-radius:10px; margin-top:14px;
-  }
-  #print-domingo-titulo{ margin:0 0 8px; font-size:.95rem; }
-  #print-domingo-cols{ display:flex; gap:10px; }
-  #print-domingo-cols table{ width:100%; border-collapse:collapse; font-size:.68rem; }
-  #print-domingo-cols th, #print-domingo-cols td{
-    text-align:left; padding:2px 4px; border:1px solid #ccc; line-height:1.2;
-  }
-  #print-domingo-cols th{ background:#f0f0f0; font-size:.62rem; }
-
-  body.modo-print-domingo .topbar, body.modo-print-domingo .period-bar,
-  body.modo-print-domingo .controls, body.modo-print-domingo footer,
-  body.modo-print-domingo .table-shell, body.modo-print-domingo .legend{
-    display:none !important;
-  }
-  body.modo-print-domingo #print-domingo-area{ display:block !important; }
-  @media print{
-    body.modo-print-domingo{ margin:0; padding:0; }
-    body.modo-print-domingo #print-domingo-area{
-      box-shadow:none; border:none; padding:4mm;
-    }
-  }
 </style>
 </head>
 <body>
@@ -511,8 +487,6 @@
   </div>
   <div class="period-actions">
     <button class="btn secondary" id="btn-print">🖨️ Imprimir / PDF</button>
-    <input type="date" id="domingo-select" title="Escolha um domingo">
-    <button class="btn secondary" id="btn-print-domingo">🖨️ Imprimir só esse domingo</button>
     <button class="btn lock-btn" id="btn-auth">🔒 Modo visualização</button>
     <button class="btn secondary" id="btn-users" style="display:none;">👤 Usuários / senha</button>
     <span class="sync-badge" id="sync-badge">🟡 Conectando…</span>
@@ -551,20 +525,6 @@
       <tbody id="table-body"></tbody>
     </table>
     <div class="no-results" id="no-results" style="display:none;">Nenhum colaborador encontrado.</div>
-  </div>
-
-  <div id="print-domingo-area" style="display:none;">
-    <h2 id="print-domingo-titulo"></h2>
-    <div id="print-domingo-cols">
-      <table>
-        <thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>Função</th><th>Horário</th></tr></thead>
-        <tbody id="print-domingo-tbody-a"></tbody>
-      </table>
-      <table>
-        <thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>Função</th><th>Horário</th></tr></thead>
-        <tbody id="print-domingo-tbody-b"></tbody>
-      </table>
-    </div>
   </div>
 
   <div class="legend">
@@ -801,7 +761,7 @@
   }
 
   // Load persisted state (férias overrides + último mês de referência)
-  let state = { refMonth: refMonthFromDate(fromISO(meta.inicio_periodo)), ferias: {}, overrides: {}, customEmployees: [], employeeEdits: {}, deletedEmployees: [] };
+  let state = { refMonth: refMonthFromDate(fromISO(meta.inicio_periodo)), ferias: {}, overrides: {}, customEmployees: [], employeeEdits: {}, deletedEmployees: [], sundayAnchors: {} };
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (saved) state = Object.assign(state, saved);
@@ -818,7 +778,7 @@
   // ---- Sincronização com Firebase (Realtime Database) ----
   // Campos sincronizados entre aparelhos: ferias, overrides, customEmployees, employeeEdits, deletedEmployees.
   // refMonth (qual mês está sendo visualizado) fica só local — cada aparelho navega livre.
-  const SYNCED_FIELDS = ['ferias','overrides','customEmployees','employeeEdits','deletedEmployees'];
+  const SYNCED_FIELDS = ['ferias','overrides','customEmployees','employeeEdits','deletedEmployees','sundayAnchors'];
   let fbDb = null;
   let fbReady = false;
   const syncBadge = document.getElementById('sync-badge');
@@ -1093,6 +1053,19 @@
     return mod(sundaysSinceAnchor + (ANCHOR_GROUP - 1), 3) + 1;
   }
 
+  // Quando um domingo é alterado manualmente (T ou DSR), esse domingo vira a "âncora" de um
+  // novo ciclo de 2 trabalhado / 1 de folga para aquele colaborador, valendo para todos os
+  // domingos seguintes (substitui o cálculo por grupo a partir dessa data).
+  function sundayStatusFromAnchor(anchor, sundayDate){
+    const diffDays = Math.round((sundayDate - fromISO(anchor.date)) / 86400000);
+    const weeksSince = diffDays / 7; // inteiro, pois ambos são domingos
+    if (anchor.status === 'DSR'){
+      return (mod(weeksSince, 3) === 0) ? 'DSR' : 'T';
+    }
+    // anchor.status === 'T': semana0=T, semana1=T, semana2=DSR, repete
+    return (mod(weeksSince, 3) === 2) ? 'DSR' : 'T';
+  }
+
   function buildDates(refMonth){
     const start = periodStartFromRefMonth(refMonth);
     const end = periodEndFromRefMonth(refMonth);
@@ -1138,6 +1111,10 @@
     if (feriasRange && iso >= feriasRange.inicio && iso <= feriasRange.fim) return 'D';
     const dow = date.getDay(); // 0=Sunday
     if (dow === 0){
+      const anchor = state.sundayAnchors[String(emp.matricula)];
+      if (anchor && iso >= anchor.date){
+        return sundayStatusFromAnchor(anchor, date);
+      }
       const g = groupOnSunday(date);
       return (g === emp.grupo) ? 'DSR' : 'T';
     }
@@ -1237,9 +1214,18 @@
     const dLabel = date.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
     document.getElementById('day-modal-name').textContent = emp.nome + ' — ' + dLabel;
     const cur = state.overrides[overrideKey(emp.matricula, iso)];
-    document.getElementById('day-modal-sub').textContent = cur
+    let subText = cur
       ? 'Marcação atual: ' + cur + '. Escolha uma nova opção ou volte ao normal.'
       : 'Escolha o que marcar neste dia.';
+    if (date.getDay() === 0){
+      const anchor = state.sundayAnchors[String(emp.matricula)];
+      if (anchor && iso >= anchor.date){
+        subText += ' Domingo em ciclo manual (2 trabalhado / 1 de folga) desde ' + anchor.date.split('-').reverse().join('/') + '.';
+      } else {
+        subText += ' Marcar T ou DSR aqui define este domingo como novo ponto de partida do ciclo 2x1 para os domingos seguintes.';
+      }
+    }
+    document.getElementById('day-modal-sub').textContent = subText;
     dayOverlay.classList.add('open');
   }
   function closeDayModal(){
@@ -1251,10 +1237,26 @@
   document.querySelectorAll('.day-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!dayModalTarget) return;
-      const key = overrideKey(dayModalTarget.emp.matricula, dayModalTarget.iso);
+      const matricula = dayModalTarget.emp.matricula;
+      const empKey = String(matricula);
+      const key = overrideKey(matricula, dayModalTarget.iso);
       const code = btn.dataset.code;
+      const isSunday = dayModalTarget.date.getDay() === 0;
+
       if (code){ state.overrides[key] = code; }
       else { delete state.overrides[key]; }
+
+      if (isSunday){
+        if (code === 'T' || code === 'DSR'){
+          // Este domingo vira a nova âncora: a partir dele, mantém sempre 2 trabalhado / 1 de folga
+          state.sundayAnchors[empKey] = { date: dayModalTarget.iso, status: code };
+        } else if (!code){
+          // "Automático": se a âncora atual for exatamente este domingo, remove e volta ao cálculo por grupo
+          const anchor = state.sundayAnchors[empKey];
+          if (anchor && anchor.date === dayModalTarget.iso){ delete state.sundayAnchors[empKey]; }
+        }
+      }
+
       persist();
       closeDayModal();
       render();
@@ -1519,71 +1521,6 @@
   document.getElementById('btn-print').addEventListener('click', () => {
     window.print();
   });
-
-  // ---- Imprimir só quem trabalha em um domingo específico ----
-  const domingoSelect = document.getElementById('domingo-select');
-  (function setDefaultDomingo(){
-    const d = new Date();
-    while (d.getDay() !== 0) d.setDate(d.getDate() + 1); // próximo domingo (ou hoje, se já for domingo)
-    domingoSelect.value = toISO(d);
-  })();
-
-  function imprimirDomingo(){
-    const raw = domingoSelect.value;
-    if (!raw){
-      alert('Escolha uma data.');
-      return;
-    }
-    const data = fromISO(raw);
-    if (data.getDay() !== 0){
-      alert('A data escolhida não é um domingo. Escolha um domingo no calendário.');
-      return;
-    }
-
-    const trabalhando = getAllEmployees().filter(e => {
-      const key = String(e.matricula);
-      const feriasRange = state.ferias[key];
-      const status = computeCell(e, data, feriasRange);
-      return status === 'T';
-    }).sort((a, b) => {
-      const ta = shiftStartMinutes(a.horario);
-      const tb = shiftStartMinutes(b.horario);
-      if (ta !== tb) return ta - tb;
-      return a.nome.localeCompare(b.nome, 'pt-BR');
-    });
-
-    const dataFmt = data.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
-    document.getElementById('print-domingo-titulo').textContent =
-      `Escala de domingo — ${dataFmt} — ${trabalhando.length} colaborador(es) trabalhando`;
-
-    const linha = (e, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${e.nome}</td>
-        <td>${e.matricula}</td>
-        <td>${e.funcao || '—'}</td>
-        <td>${e.horario || '—'}</td>
-      </tr>`;
-
-    const metade = Math.ceil(trabalhando.length / 2);
-    const colA = trabalhando.slice(0, metade);
-    const colB = trabalhando.slice(metade);
-
-    document.getElementById('print-domingo-tbody-a').innerHTML =
-      colA.map((e, i) => linha(e, i)).join('') || '<tr><td colspan="5">Nenhum colaborador trabalhando nesse domingo.</td></tr>';
-    document.getElementById('print-domingo-tbody-b').innerHTML =
-      colB.map((e, i) => linha(e, i + metade)).join('');
-
-    document.body.classList.add('modo-print-domingo');
-    window.print();
-  }
-
-  window.addEventListener('afterprint', () => {
-    document.body.classList.remove('modo-print-domingo');
-  });
-
-  document.getElementById('btn-print-domingo').addEventListener('click', imprimirDomingo);
-
   refMonthInput.addEventListener('change', render);
   document.getElementById('search').addEventListener('input', render);
   shiftSelect.addEventListener('change', render);
